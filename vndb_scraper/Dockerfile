@@ -1,13 +1,12 @@
 FROM node:18-alpine
 
 # Create app directory
-RUN mkdir -p /home/atri/
-WORKDIR /home/atri/
+WORKDIR /app
 
 # Install depedencies
-RUN yarn install
-RUN yarn global add nodemon
 RUN apk add git
 RUN git clone https://github.com/vnlx2/vndb_scraper.git
+WORKDIR /app/vndb_scraper
+RUN npm install -f --verbose
 
-CMD [ "yarn", "run", "start" ]
+CMD [ "node", "index.js" ]
