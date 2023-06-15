@@ -1,21 +1,29 @@
 
-version: "3"
+version: "3.5"
 services:
   mongodb:
     restart: always
     image: mongo
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=atri
+    #   - MONGO_INITDB_ROOT_PASSWORD=akulupa
     networks:
       atri-net:
-        ipv4_address: 192.168.48.2
+        ipv4_address: 192.168.15.2
     volumes:
       - atri-vol:/data/db
+      # - ./init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    command: mongod
 
   atri-api:
     build: ./atri_api
     restart: always
     networks:
       atri-net:
-        ipv4_address: 192.168.48.3
+        ipv4_address: 192.168.15.3
+    volumes:
+      - ./atri_api/.env:/app/atri_api/.env:ro
+    command: cat "/app/atri_api/.env"
     depends_on: 
       - mongodb
 
@@ -24,7 +32,9 @@ services:
     build: ./atri_bot
     networks:
       atri-net:
-        ipv4_address: 192.168.48.4
+        ipv4_address: 192.168.15.4
+    volumes:
+      - ./atri_bot/.env:/app/atri_bot/.env
     depends_on: 
       - mongodb
 
@@ -33,7 +43,9 @@ services:
     build: ./atri_admin
     networks:
       atri-net:
-        ipv4_address: 192.168.48.5
+        ipv4_address: 192.168.15.5
+    volumes:
+      - ./atri_admin/.env:/app/atri_admin/.env
     depends_on: 
       - atri-api
 
@@ -42,8 +54,10 @@ services:
     build: ./vndb_scraper
     networks:
       atri-net:
-        ipv4_address: 192.168.48.6
-    depends_on: 
+        ipv4_address: 192.168.15.6
+    volumes:
+      - ./vndb_scraper/.env:/app/vndb_scraper/.env
+    depends_on:
       - mongodb
 
 networks:
@@ -52,11 +66,15 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 192.168.48.0/29
-        gateway: 192.168.48.1
+      - subnet: 192.168.15.0/29
+        gateway: 192.168.15.1
     driver_opts:
       com.docker.network.bridge.name: atri-net
 
 volumes:
   atri-vol:
     driver: local
+
+secrets:
+  mongodb_uri: 
+    external: true
