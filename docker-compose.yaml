@@ -1,0 +1,62 @@
+
+version: "3"
+services:
+  mongodb:
+    restart: always
+    image: mongo
+    networks:
+      atri-net:
+        ipv4_address: 192.168.48.2
+    volumes:
+      - atri-vol:/data/db
+
+  atri-api:
+    build: ./atri_api
+    restart: always
+    networks:
+      atri-net:
+        ipv4_address: 192.168.48.3
+    depends_on: 
+      - mongodb
+
+  atri-bot:
+    restart: always
+    build: ./atri_bot
+    networks:
+      atri-net:
+        ipv4_address: 192.168.48.4
+    depends_on: 
+      - mongodb
+
+  atri-admin:
+    restart: always
+    build: ./atri_admin
+    networks:
+      atri-net:
+        ipv4_address: 192.168.48.5
+    depends_on: 
+      - atri-api
+
+  vndb-scraper:
+    restart: always
+    build: ./vndb_scraper
+    networks:
+      atri-net:
+        ipv4_address: 192.168.48.6
+    depends_on: 
+      - mongodb
+
+networks:
+  atri-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.48.0/29
+        gateway: 192.168.48.1
+    driver_opts:
+      com.docker.network.bridge.name: atri-net
+
+volumes:
+  atri-vol:
+    driver: local
