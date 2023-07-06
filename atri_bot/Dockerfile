@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install depedencies
 RUN apk add git
-RUN git clone https://github.com/vnlx2/atri_bot.git
+RUN git clone -b main https://github.com/vnlx2/atri_bot.git
 WORKDIR /app/atri_bot
 RUN npm install -f --verbose
 
