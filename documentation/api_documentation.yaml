@@ -1,0 +1,745 @@
+openapi: 3.0.3
+info:
+  title: ATRI API
+  description: |-
+    This API is used for the operation of the admin dashboard and 
+    ATRI bot on the Visual Novel Lovers discord server.
+    
+    If you are experiencing problems, you can contact in the contact section
+    below or join the VNL server.
+    
+    [
+      <img src="https://cdn.discordapp.com/attachments/1013464345008685208/1159534277109760081/discord-button.png?ex=65315f72&is=651eea72&hm=bf19e65d9046015de8b131f7584f8c09e906c3afdc93c5c4d99f04f024803c87&" 
+      width="150" height="50"/>
+    ](https://discord.com/invite/fBU7xB9)
+  contact:
+    email: admin@vnlx.org
+  license:
+    name: GNU General Public License v3.0 or later
+    url: https://spdx.org/licenses/GPL-3.0-or-later.html
+  version: 1.1.0
+servers:
+  - url: http://127.0.0.1:8016/v1/
+tags:
+  - name: Authentication
+    description: Authenticate to get Access to API
+  - name: Users
+    description: Manage Users Data
+  - name: Visual Novel
+    description: Manage Visual Novel Data
+  - name: Birthday
+    description: Manage Birthday data (Currently only for akashic server)
+paths:
+  /login:
+    post:
+      tags: 
+        - Authentication
+      summary: User Login
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+            example:
+              username: "moonchild"
+              password: "mugyuu123"
+      responses:
+        "200":
+          description: "Login Successful"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+              example:
+                success: true
+                message: "Login Success"
+                data: {
+                  token: "<<TOKEN>>"
+                }
+        "400":
+          description: "Login Failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                Username Not Found:
+                  value:
+                    success: false
+                    errorCode: username_not_found
+                    message: User Not Found
+                Password Missmatch:
+                  value:
+                    success: false
+                    errorCode: incorrect_password
+                    message: Incorrect Password
+  /logout:
+    post:
+      tags: 
+        - Authentication
+      operationId: logout
+      summary: Logout from API and Blacklist Token
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Logout Success"
+          content:
+            application/json:
+              schema:   
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Logout Successful"
+  /users:
+    get:
+      tags: 
+        - Users
+      summary: Get all registered users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Get Users Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - properties:
+                      data:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/UserModel'
+  /user/{id}:
+    get:
+      tags: 
+        - Users
+      summary: Get all registered users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Get Users Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/UserModel'
+        "404":
+          description: "User ID not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /user/store:
+    post:
+      tags:
+        - Users
+      summary: Store New User
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInputRequest'
+      responses:
+        "201":
+          description: "Store success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /user/update:
+    put:
+      tags:
+        - Users
+      summary: Update User
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/UserInputRequest'
+      responses:
+        "200":
+          description: "Update success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /update/delete/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Delete User Except Super-Admin's Role
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Delete success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /visualnovels:
+    get:
+      tags:
+        - Visual Novel
+      summary: Get List of Visual Novels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: isBot
+          in: query
+          description: If isBot is true, the API will return 5 visual novels per page, otherwise it will return 20 visual novels per page
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Fetch Success
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/VNList'
+  /visualnovel/{code}:
+    get:
+      tags:
+        - Visual Novel
+      summary: Get Visual Novel Detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: onlyTitle
+          in: query
+          description: If onlyTitle is true, API will return only code and title
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Fetch Success
+          content:
+            application/json:
+              schema:
+                type: object
+                oneOf:
+                  - $ref: '#/components/schemas/VNList'
+                  - allOf:
+                    - $ref: '#/components/schemas/VNModel'
+                    - $ref: '#/components/schemas/DataTimeDate'
+              examples:
+                all:
+                  summary: "All VN Data"
+                  value:
+                    code: "4"
+                    title: "CLANNAD"
+                    aliases: [
+                      "クラナド"
+                    ]
+                    length: 5
+                    rating: 8.66
+                    description: "Okazaki Tomoya is a third year high school student at Hikarizaka Private High School, leading a life full of resentment. His mother passed away in a car accident when he was young, leading his father, Naoyuki, to resort to alcohol and gambling to cope. This resulted in constant fights between the two until Naoyuki dislocated Tomoya’s shoulder. Unable to play on his basketball team, Tomoya began to distance himself from other people. Ever since he has had a distant relationship with his father, naturally becoming a delinquent over time.\n\nWhile on a walk to school, Tomoya meets a strange girl named Furukawa Nagisa, questioning if she likes the school at all. He finds himself helping her, and as time goes by, Tomoya finds his life heading towards a new direction."
+                    image: "https://s2.vndb.org/cv/52/24252.jpg"
+                    downloadUrl: {
+                      jpLink: [
+                        {
+                          provider: "Drive",
+                          type: "-",
+                          platform: "Windows",
+                          url: "https://drive.google.com/drive/folders/DUMMY",
+                        }
+                      ],
+                      enLink: [
+                        {
+                          provider: "Drive",
+                          type: "-",
+                          platform: "Windows",
+                          url: "https://drive.google.com/drive/folders/DUMMY",
+                        }
+                      ],
+                      idLink: [
+                        {
+                          provider: "Drive",
+                          type: "-",
+                          platform: "Windows",
+                          url: "https://drive.google.com/drive/folders/DUMMY",
+                        }
+                      ]
+                    }
+                onlyTitle:
+                  summary: "Fetch only code and title"
+                  value:
+                    code: "4"
+                    title: "CLANNAD"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /visualnovel/store:
+    post:
+      tags:
+        - Visual Novel
+      summary: Store Visual Novel Data (may include download urls) without going through scraper system
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VNModel'
+      responses:
+        "201":
+          description: "Store success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /visualnovel/update:
+    put:
+      tags:
+        - Visual Novel
+      summary: Update Visual Novel Data
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VNModel'
+      responses:
+        "200":
+          description: "Update success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /visualnovel/delete/{code}:
+    delete:
+      tags:
+        - Visual Novel
+      summary: Delete Visual Novel Data
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Delete success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /birthdays:
+    get:
+      tags:
+        - Birthday
+      summary: List of Birthday's User
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Fetch Success
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BirthdayModel'
+  /birthday/{id}:
+    get:
+      tags:
+        - Birthday
+      summary: Get Birthday Data
+      security: 
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Fetch Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BirthdayModel'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /birthday/store:
+    post:
+      tags:
+        - Birthday
+      summary: Store Birthday Data
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BirthdayModel'
+      responses:
+        "201":
+          description: "Store success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /birthday/update:
+    put:
+      tags:
+        - Birthday
+      summary: Update Birthday Data
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BirthdayModel'
+      responses:
+        "200":
+          description: "Update success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - properties:
+                      errors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ValidationError'
+  /birthday/delete/{id}:
+    delete:
+      tags:
+        - Birthday
+      summary: Delete Birthday Data
+      security: 
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Fetch Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BirthdayModel'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        errorCode:
+          type: string
+        message:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        field: 
+          type: string
+        message:
+          type: string
+    UserInputRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          default: "admin"
+          enum: [
+            "superadmin",
+            "admin"
+          ]
+      required:
+        - username
+        - password
+        - role
+    UserModel:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          default: "admin"
+          enum: [
+            "superadmin",
+            "admin"
+          ]
+      required:
+        - id
+        - username
+        - password
+        - role
+    VNList:
+      type: object
+      properties:
+        code:
+          type: string
+        title:
+          type: string
+      required:
+        - code
+        - title
+    VNModel:
+      type: object
+      properties:
+        code:
+          type: string
+        title:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        length:
+          type: number
+        rating:
+          type: number
+        description:
+          type: string
+        image:
+          type: string
+        downloadUrl:
+          type: object
+          properties:
+            jpLink:
+              type: array
+              items:
+                $ref: '#/components/schemas/VNDLUrl'
+            enLink:
+              type: array
+              items:
+                $ref: '#/components/schemas/VNDLUrl'
+            idLink:
+              type: array
+              items:
+                $ref: '#/components/schemas/VNDLUrl'
+      required:
+        - code
+        - title
+        - image
+    BirthdayModel:
+      type: object
+      properties:
+        id:
+          type: string
+        month:
+          type: number
+        day:
+          type: number
+    VNDLUrl:
+      type: object
+      properties:
+        provider:
+          type: string
+        type:
+          type: string
+        platform:
+          type: string
+        url:
+          type: string
+      required:
+        - provider
+        - type
+        - platform
+        - url
+    DataTimeDate:
+      type: object
+      properties:
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

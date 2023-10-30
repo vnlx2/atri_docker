@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Create app directory
 WORKDIR /app
@@ -8,5 +8,11 @@ RUN apk add git
 RUN git clone https://github.com/vnlx2/atri_api.git
 WORKDIR /app/atri_api
 RUN npm install -f --verbose
+RUN npm run compile
+RUN CP package.json ../package.json
 
-CMD [ "node", "app.js" ]
+WORKDIR /app
+RUN npm install --production --verbose
+RUN rm -r /app/atri_api
+
+CMD [ "node", "build/index.js" ]

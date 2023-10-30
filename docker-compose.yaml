@@ -4,47 +4,58 @@ services:
   mongodb:
     restart: always
     image: mongo
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=atri
-    #   - MONGO_INITDB_ROOT_PASSWORD=akulupa
+    container_name: db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=atri
+      - MONGO_INITDB_ROOT_PASSWORD=akulupa
+      - MONGO_INITDB_DATABASE=atri
     networks:
       atri-net:
         ipv4_address: 192.168.15.2
     volumes:
-      - atri-vol:/data/db
-      # - ./init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    command: mongod
+      - ./resolv.conf:/etc/resolv.conf
+      - ./mongo_data:/data/db
+    ports:
+      - 27017:27017
 
   atri-api:
     build: ./atri_api
     restart: always
+    container_name: api
     networks:
       atri-net:
         ipv4_address: 192.168.15.3
     volumes:
+      - ./resolv.conf:/etc/resolv.conf
       - ./atri_api/.env:/app/atri_api/.env:ro
-    command: cat "/app/atri_api/.env"
     depends_on: 
       - mongodb
+      - redis
 
   atri-bot:
     restart: always
     build: ./atri_bot
+    container_name: bot
     networks:
       atri-net:
         ipv4_address: 192.168.15.4
     volumes:
+      - ./resolv.conf:/etc/resolv.conf
       - ./atri_bot/.env:/app/atri_bot/.env
+      - ./atri_bot/arof/:/app/atri_bot/utils/arof/
+      - ./atri_bot/imsakiyah/:/app/atri_bot/utils/imsakiyah/
     depends_on: 
       - mongodb
 
   atri-admin:
     restart: always
     build: ./atri_admin
+    container_name: admin
     networks:
       atri-net:
         ipv4_address: 192.168.15.5
     volumes:
+      - ./resolv.conf:/etc/resolv.conf
       - ./atri_admin/.env:/app/atri_admin/.env
     depends_on: 
       - atri-api
@@ -52,13 +63,24 @@ services:
   vndb-scraper:
     restart: always
     build: ./vndb_scraper
+    container_name: scraper
     networks:
       atri-net:
         ipv4_address: 192.168.15.6
     volumes:
+      - ./resolv.conf:/etc/resolv.conf
       - ./vndb_scraper/.env:/app/vndb_scraper/.env
     depends_on:
       - mongodb
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+    networks:
+      - atri-net:
+        ipv4_address: 192.168.15.7
+    volumes:
+      - ./redis_data:/data
 
 networks:
   atri-net:
@@ -70,10 +92,6 @@ networks:
         gateway: 192.168.15.1
     driver_opts:
       com.docker.network.bridge.name: atri-net
-
-volumes:
-  atri-vol:
-    driver: local
 
 secrets:
   mongodb_uri: 

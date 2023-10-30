@@ -1,0 +1,115 @@
+[
+  {
+    "utterance": [],
+    "response": [
+      "Hi",
+      "Nani",
+      "Haiii....",
+      "Jangan panggil aku!",
+      "Kangen ya? hehe",
+      "Menjauh dasar mesum!",
+      "Sini peluk",
+      "Ada apa sayang?",
+      "<@USERID> Hentai!",
+      "Gohan ni suru? ofuro ni suru? Soretomo....."
+    ],
+    "option": "mention"
+  },
+  {
+    "utterance": [],
+    "response": [
+      "wa-ta-shi~:heart:",
+      "ti-dur-di-luar :stuck_out_tongue_closed_eyes:"
+    ],
+    "option": "mention gohan"
+  },
+  {
+    "utterance": [],
+    "response": [
+      {
+        "maxHour": 10,
+        "response": "<@USERID>-san, sudah pagi loh..."
+      },
+      {
+        "maxHour": 15,
+        "response": "<@USERID>-san, sudah siang loh..."
+      },
+      {
+        "maxHour": 18,
+        "response": "<@USERID>-san, sudah sore loh..."
+      },
+      {
+        "maxHour": 23,
+        "response": "<@USERID>-san, sudah malam loh..."
+      }
+    ],
+    "option": "invalid greeting"
+  },
+  {
+    "utterance": [
+      "selamat ulang tahun",
+      "habede",
+      "birthday",
+      "tanjoubi"
+    ],
+    "response": "Thank you ucapannya, <@USERID>... Atri bahagia deh jadinya :slight_smile:",
+    "option": "atri birthday"
+  },
+  {
+    "utterance": [
+      "pagi",
+      "selamat pagi",
+      "met pagi",
+      "owayo",
+      "ohayou",
+      "ohayo",
+      "good morning",
+      "morning"
+    ],
+    "response": [
+      "Ohayou, <@USERID>-san",
+      "Ohayou, Goshuujin-sama"
+    ],
+    "option": "morning greeting"
+  },
+  {
+    "utterance": [
+      "malam",
+      "selamat malam",
+      "met malam",
+      "oyasumi",
+      "good night",
+      "night"
+    ],
+    "response": [
+      {
+        "message": "Oyasumi, ",
+        "embed": "https://cdn.discordapp.com/attachments/955866146060517416/963302540416520212/unknown.png"
+      },
+      {
+        "message": "Hai, Hizamakura desu! Hehe... Yoshi yoshi~ <@REI>-sama! Oyasumi",
+        "embed": "https://cdn.discordapp.com/attachments/853972029983293440/963486674749366352/unknown.png"
+      },
+      {
+        "message": "Hehehe, there you are bedtime♪ Have a nice, peaceful sleep! <@MOON>-san! Daisuki yo...",
+        "embed": "https://media.discordapp.net/attachments/955866146060517416/963305097864044596/unknown.png"
+      }
+    ],
+    "option": "night greeting"
+  },
+  {
+    "utterance": ["<:zeana:955876197420638268>"],
+    "response": "なんでやねん！"
+  },
+  {
+    "utterance": ["kani"],
+    "response": [
+      ":crab:",
+      "kani daisuki~"
+    ]
+  },
+  {
+    "utterance": ["cunny"],
+    "response": ":sob::sob::sob:"
+  }
+]
