@@ -9,7 +9,7 @@ RUN git clone https://github.com/vnlx2/atri_api.git
 WORKDIR /app/atri_api
 RUN npm install -f --verbose
 RUN npm run compile
-RUN CP package.json ../package.json
+RUN cp package.json ../package.json
 
 WORKDIR /app
 RUN npm install --production --verbose
