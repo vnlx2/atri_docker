@@ -1,10 +1,12 @@
+version: "3.7"
 
-version: "3.5"
 services:
   mongodb:
     restart: always
     image: mongo
     container_name: atri_db
+    env_file:
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
