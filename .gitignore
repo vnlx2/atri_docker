@@ -4,3 +4,5 @@ atri_bot/.env
 atri_api/.env
 mongo_data/
 redis_data/
+.env
+*.patch

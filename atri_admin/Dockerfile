@@ -1,25 +1,16 @@
-# Use the official Nginx base image
-FROM nginx:latest
+FROM node:20-alpine
 
-# Install Git and Node.js
-RUN apt-get update && apt-get install -y git && apt-get install -y curl && \
-    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
-
-# Set the working directory to /app
+# Create app directory
 WORKDIR /app
 
-# Clone the Node.js project repository
+# Install depedencies
+RUN apk add git
 RUN git clone https://github.com/vnlx2/atri_web_panel.git
-
-# Change directory to the cloned repository
 WORKDIR /app/atri_web_panel
+RUN yarn install --verbose && \
+    yarn build --dotenv .env --verbose
 
-# Install project dependencies
-RUN npm install --verbose
+EXPOSE 80
+COPY .env.prod ./.env.prod
 
-# Build the project
-RUN npm run build --verbose
-
-# Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/nginx.conf
+CMD [ "node", "--env-file", ".env.prod",".output/server/index.mjs" ]
