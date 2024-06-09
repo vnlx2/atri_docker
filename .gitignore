@@ -1,6 +1,10 @@
 vndb_scraper/.env
 atri_admin/.env
+atri_admin/.env.prod
 atri_bot/.env
 atri_api/.env
+atri_api/storageProvider.json
 mongo_data/
 redis_data/
+.env
+*.patch

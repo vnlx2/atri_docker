@@ -6,8 +6,8 @@ services:
     image: mongo
     container_name: atri_db
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=atri
-      - MONGO_INITDB_ROOT_PASSWORD=akulupa
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=atri
     networks:
       atri-net:
@@ -30,6 +30,7 @@ services:
     volumes:
       - ./resolv.conf:/etc/resolv.conf
       - ./atri_api/.env:/app/.env:ro
+      - ./atri_api/storageProvider.json:/app/data/storageProvider.json
     depends_on: 
       - mongodb
       - redis
@@ -58,7 +59,8 @@ services:
         ipv4_address: 192.168.15.5
     volumes:
       - ./resolv.conf:/etc/resolv.conf
-      - ./atri_admin/.env:/app/atri_admin/.env
+      - ./atri_admin/.env:/app/atri_web_panel/.env
+      - ./atri_admin/.env.prod:/app/atri_web_panel/.env.prod
     depends_on: 
       - atri-api
 
